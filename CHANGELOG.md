@@ -1,13 +1,29 @@
 # Change Log
 
-## Unreleased
+## [0.10.1][2017-05-16] `GET /posts?_sort=user,views&_order=desc,asc`
+
+* Multiple fields sorting
+
+## [0.10.0][2017-04-26]
+
+* __Drop Node `v0.12` support__
+* Prevent `TypeError` when a filter is applied on a `null` value [#510](https://github.com/typicode/json-server/issues/510)
+
+## [0.9.6][2017-03-08]
+
+* Update index page
+* Improve performances ([lowdb](https://github.com/typicode/lowdb) `v0.15`)
+* Add `Location` header to newly created resources [#473](https://github.com/typicode/json-server/pull/473)
+
+## [0.9.5][2017-02-11]
 
 * Display custom routes on homepage
+* Fix duplicate query params error [#352](https://github.com/typicode/json-server/issues/352)
 
 ## [0.9.4][2016-12-08]
 
 * Improve rewriter [#431](https://github.com/typicode/json-server/issues/431)
-* Improve watch mode [#427](https://github.com/typicode/json-server/pull/427) 
+* Improve watch mode [#427](https://github.com/typicode/json-server/pull/427)
 
 ## [0.9.3][2016-12-07]
 
@@ -34,7 +50,7 @@
   * [#363](https://github.com/typicode/json-server/issues/363) [#365](https://github.com/typicode/json-server/issues/365)
   * [#374](https://github.com/typicode/json-server/issues/374)
   * [#383](https://github.com/typicode/json-server/issues/383)
-* Updated dependencies and codebase to ES6 
+* Updated dependencies and codebase to ES6
 
 ## [0.8.23][2016-11-03]
 

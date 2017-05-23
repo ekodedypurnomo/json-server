@@ -1,9 +1,9 @@
 const express = require('express')
 const methodOverride = require('method-override')
 const _ = require('lodash')
-const _db = require('underscore-db')
+const lodashId = require('lodash-id')
 const low = require('lowdb')
-const fileAsync = require('lowdb/lib/file-async')
+const fileAsync = require('lowdb/lib/storages/file-async')
 const bodyParser = require('../body-parser')
 const validateData = require('./validate-data')
 const plural = require('./plural')
@@ -30,8 +30,8 @@ module.exports = (source) => {
 
   validateData(db.getState())
 
-  // Add underscore-db methods to db
-  db._.mixin(_db)
+  // Add lodash-id methods to db
+  db._.mixin(lodashId)
 
   // Add specific mixins
   db._.mixin(mixins)

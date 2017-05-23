@@ -1,7 +1,8 @@
-const url = require('url')
 const express = require('express')
 const _ = require('lodash')
 const pluralize = require('pluralize')
+const write = require('./write')
+const getFullURL = require('./get-full-url')
 const utils = require('../utils')
 
 module.exports = (db, name) => {
@@ -31,15 +32,6 @@ module.exports = (db, name) => {
           resource[innerResource] = db.get(plural).getById(resource[prop]).value()
         }
       })
-  }
-
-  function getFullURL (req) {
-    const root = url.format({
-      protocol: req.protocol,
-      host: req.get('host')
-    })
-
-    return `${root}${req.originalUrl}`
   }
 
   // GET /name
@@ -92,6 +84,10 @@ module.exports = (db, name) => {
 
     if (q) {
       // Full-text search
+      if (Array.isArray(q)) {
+        q = q[0]
+      }
+
       q = q.toLowerCase()
 
       chain = chain.filter((obj) => {
@@ -118,9 +114,12 @@ module.exports = (db, name) => {
               const isRange = /_lte$/.test(key) || /_gte$/.test(key)
               const isLike = /_like$/.test(key)
               const path = key.replace(/(_lte|_gte|_ne|_like)$/, '')
+              // get item value based on path
+              // i.e post.title -> 'foo'
               const elementValue = _.get(element, path)
 
-              if (elementValue === undefined) {
+              // Prevent toString() failing on undefined or null values
+              if (elementValue === undefined || elementValue === null) {
                 return
               }
 
@@ -145,15 +144,9 @@ module.exports = (db, name) => {
 
     // Sort
     if (_sort) {
-      _order = _order || 'ASC'
-
-      chain = chain.sortBy(function (element) {
-        return _.get(element, _sort)
-      })
-
-      if (_order === 'DESC') {
-        chain = chain.reverse()
-      }
+      const _sortSet = _sort.split(',')
+      const _orderSet = (_order || '').split(',').map(s => s.toLowerCase())
+      chain = chain.orderBy(_sortSet, _orderSet)
     }
 
     // Slice result
@@ -239,12 +232,17 @@ module.exports = (db, name) => {
 
   // POST /name
   function create (req, res, next) {
-    const resource = db.get(name)
+    const resource = db
+      .get(name)
       .insert(req.body)
       .value()
 
+    res.setHeader('Access-Control-Expose-Headers', 'Location')
+    res.location(`${getFullURL(req)}/${resource.id}`)
+
     res.status(201)
     res.locals.data = resource
+
     next()
   }
 
@@ -289,15 +287,17 @@ module.exports = (db, name) => {
     next()
   }
 
+  const w = write(db)
+
   router.route('/')
     .get(list)
-    .post(create)
+    .post(create, w)
 
   router.route('/:id')
     .get(show)
-    .put(update)
-    .patch(update)
-    .delete(destroy)
+    .put(update, w)
+    .patch(update, w)
+    .delete(destroy, w)
 
   return router
 }

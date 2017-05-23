@@ -1,4 +1,6 @@
 const express = require('express')
+const write = require('./write')
+const getFullURL = require('./get-full-url')
 
 module.exports = (db, name) => {
   const router = express.Router()
@@ -11,6 +13,10 @@ module.exports = (db, name) => {
   function create (req, res, next) {
     db.set(name, req.body).value()
     res.locals.data = db.get(name).value()
+
+    res.setHeader('Access-Control-Expose-Headers', 'Location')
+    res.location(`${getFullURL(req)}`)
+
     res.status(201)
     next()
   }
@@ -29,11 +35,13 @@ module.exports = (db, name) => {
     next()
   }
 
+  const w = write(db)
+
   router.route('/')
     .get(show)
-    .post(create)
-    .put(update)
-    .patch(update)
+    .post(create, w)
+    .put(update, w)
+    .patch(update, w)
 
   return router
 }
